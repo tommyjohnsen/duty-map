@@ -1,0 +1,79 @@
+superiority = [
+  ["reference_exception", "ordinary_loan"],
+  ["accessibility_date_exception", "ordinary_due_date"],
+]
+
+[[duties]]
+id = "record_loan"
+label = "Record an eligible loan"
+category = "other"
+source = "Elm Harbor Library Guide 4"
+pinpoint = "part 2"
+jurisdiction = "US"
+summary = "Record a loan when an eligible item may be borrowed."
+conditions = ["may_borrow"]
+
+[duties.relations]
+supports = ["ordinary_loan"]
+attacks = []
+exception_to = []
+
+[[rules]]
+id = "ordinary_loan"
+kind = "defeasible"
+premises = ["member", "has_card"]
+conclusion = "may_borrow"
+
+[[rules]]
+id = "reference_exception"
+kind = "defeater"
+premises = ["reference_item"]
+conclusion = "~may_borrow"
+
+[[duties]]
+id = "return_on_due_date"
+label = "Return a borrowed item by its due date"
+category = "other"
+source = "Elm Harbor Library Guide 7"
+pinpoint = "part 1"
+jurisdiction = "US"
+summary = "Return a borrowed item by the assigned due date."
+conditions = ["ordinary_due_date_applies"]
+
+[duties.relations]
+supports = ["ordinary_due_date"]
+attacks = []
+exception_to = []
+
+[[duties]]
+id = "return_on_extended_date"
+label = "Return an accessibility loan by its extended date"
+category = "other"
+source = "Elm Harbor Library Guide 7"
+pinpoint = "part 3"
+jurisdiction = "US"
+summary = "Return an eligible accessibility loan by its extended due date."
+conditions = ["extended_due_date_applies"]
+
+[duties.relations]
+supports = ["accessibility_extension"]
+attacks = ["return_on_due_date"]
+exception_to = ["return_on_due_date"]
+
+[[rules]]
+id = "ordinary_due_date"
+kind = "defeasible"
+premises = ["item_borrowed"]
+conclusion = "ordinary_due_date_applies"
+
+[[rules]]
+id = "accessibility_extension"
+kind = "strict"
+premises = ["item_borrowed", "extension_approved"]
+conclusion = "extended_due_date_applies"
+
+[[rules]]
+id = "accessibility_date_exception"
+kind = "defeater"
+premises = ["extension_approved"]
+conclusion = "~ordinary_due_date_applies"
