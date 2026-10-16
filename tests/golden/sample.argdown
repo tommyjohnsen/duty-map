@@ -1,0 +1,17 @@
+# Duty Map
+
+## Duties
+
+[Duty record]: Record the loan — Record an eligible loan.
+  - Source: Invented Guide 1, part 1
+  - Conditions: eligible
+  +> [Rule allow]
+
+## Rules
+
+[Rule allow]: (member) => eligible [defeasible]
+[Rule block]: (restricted) ~> not eligible [defeater]
+
+## Superiority
+
+[Rule block] +> [Rule allow]

@@ -1,0 +1,8 @@
+# Add superiority pairs as ["higher_rule_id", "lower_rule_id"].
+superiority = []
+
+# Add [[duties]] tables here.
+duties = []
+
+# Add [[rules]] tables here.
+rules = []

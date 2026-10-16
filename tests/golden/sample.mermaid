@@ -1,0 +1,18 @@
+flowchart TD
+  f1["eligible"]
+  f2["member"]
+  f3["restricted"]
+  d1["Duty: Record the loan"]
+  r1{"allow (defeasible)"}
+  r2{"block (defeater)"}
+  f2 -->|premise| r1
+  r1 -->|concludes| f1
+  f3 -->|premise| r2
+  r2 -->|defeats| f1
+  f1 -->|requires| d1
+  d1 -.->|supports| r1
+  r2 -.->|overrides| r1
+  classDef duty fill:#eef,stroke:#446;
+  classDef rule fill:#efe,stroke:#464;
+  class d1 duty;
+  class r1,r2 rule;

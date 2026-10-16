@@ -1,0 +1,15 @@
+# Rules
+
+## allow
+- Kind: defeasible
+- If: member
+- Then: eligible
+
+## block
+- Kind: defeater
+- If: restricted
+- Then: not eligible
+
+# Superiority
+
+- block overrides allow
