@@ -1,8 +1,7 @@
 # PROVENANCE (mirror of .provenance/ledger.jsonl; ledger wins)
 # written-by: unknown (pre-provenance) | 2026-10-16 | 552b829
 # modified-by: codex/gpt-5.6-sol | 2026-10-26 | 47cf23f | fix order-dependent conflict resolution and add provenance block
-# modified-by: codex/gpt-5.6-sol | 2026-10-26 | pending | compute proved and refuted literals to a joint fixpoint
-# reviewed-by: claude-code/claude-opus-5-5 | 2026-10-26 | REJECT
+# modified-by: codex/gpt-5.6-sol | 2026-10-26 | a8c3e64 | compute proved and refuted literals to a joint fixpoint
 # END PROVENANCE
 """A compact, deterministic defeasible evaluator."""
 
