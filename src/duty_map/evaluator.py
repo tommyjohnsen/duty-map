@@ -1,3 +1,7 @@
+# PROVENANCE (mirror of .provenance/ledger.jsonl; ledger wins)
+# written-by: unknown (pre-provenance) | 2026-10-16 | 552b829
+# modified-by: codex/gpt-5.6-sol | 2026-10-26 | pending | fix order-dependent conflict resolution and add provenance block
+# END PROVENANCE
 """A compact, deterministic defeasible evaluator."""
 
 from __future__ import annotations
@@ -69,18 +73,31 @@ def evaluate(duty_map: DutyMap, facts: Iterable[str] = ()) -> Evaluation:
                 definite[rule.conclusion] = _chain(rule, definite)
                 changed = True
 
-    supported = dict(definite)
     rank = _superiority_closure(duty_map.superiority)
+    reachable = set(definite)
     changed = True
     while changed:
         changed = False
-        applicable = [rule for rule in rules if all(p in supported for p in rule.premises)]
-        for rule in applicable:
+        for rule in rules:
+            if not all(premise in reachable for premise in rule.premises):
+                continue
+            if rule.kind != "defeater" and rule.conclusion not in reachable:
+                reachable.add(rule.conclusion)
+                changed = True
+
+    activated = [rule for rule in rules if all(p in reachable for p in rule.premises)]
+    supported = dict(definite)
+    changed = True
+    while changed:
+        changed = False
+        for rule in activated:
             if rule.kind == "defeater" or rule.conclusion in supported:
+                continue
+            if not all(premise in supported for premise in rule.premises):
                 continue
             if opposite(rule.conclusion) in definite:
                 continue
-            opponents = [other for other in applicable if other.conclusion == opposite(rule.conclusion)]
+            opponents = [other for other in activated if other.conclusion == opposite(rule.conclusion)]
             if all(_is_superior(rule.id, other.id, rank) for other in opponents):
                 supported[rule.conclusion] = _chain(rule, supported)
                 changed = True

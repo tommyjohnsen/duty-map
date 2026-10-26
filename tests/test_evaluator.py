@@ -1,3 +1,7 @@
+# PROVENANCE (mirror of .provenance/ledger.jsonl; ledger wins)
+# written-by: unknown (pre-provenance) | 2026-10-16 | 552b829
+# modified-by: codex/gpt-5.6-sol | 2026-10-26 | pending | add later-activated conflict regression test and provenance block
+# END PROVENANCE
 from duty_map import DutyMap, Provability, Rule, evaluate
 
 
@@ -21,6 +25,17 @@ def test_equal_conflict_proves_neither_side():
     rules = (
         Rule("yes", "defeasible", ("a",), "b"),
         Rule("no", "defeasible", ("a",), "~b"),
+    )
+    result = evaluate(DutyMap((), rules), ["a"])
+    assert result.status("b") is Provability.NOT_PROVABLE
+    assert result.status("~b") is Provability.NOT_PROVABLE
+
+
+def test_equal_conflict_activated_by_later_derived_premise_proves_neither_side():
+    rules = (
+        Rule("yes", "defeasible", ("a",), "b"),
+        Rule("derive_opposition", "defeasible", ("a",), "opposition"),
+        Rule("no", "defeasible", ("opposition",), "~b"),
     )
     result = evaluate(DutyMap((), rules), ["a"])
     assert result.status("b") is Provability.NOT_PROVABLE
