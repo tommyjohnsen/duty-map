@@ -2,6 +2,7 @@
 # written-by: unknown (pre-provenance) | 2026-10-16 | 552b829
 # modified-by: codex/gpt-5.6-sol | 2026-10-26 | 47cf23f | add later-activated conflict regression test and provenance block
 # modified-by: codex/gpt-5.6-sol | 2026-10-26 | a8c3e64 | add refuted-premise and rule-order regression coverage
+# reviewed-by: claude-code/claude-opus-5-5 | 2026-10-26 | APPROVE_WITH_NITS
 # END PROVENANCE
 from duty_map import Duty, DutyMap, Provability, Rule, evaluate
 
