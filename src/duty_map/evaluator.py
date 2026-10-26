@@ -1,6 +1,7 @@
 # PROVENANCE (mirror of .provenance/ledger.jsonl; ledger wins)
 # written-by: unknown (pre-provenance) | 2026-10-16 | 552b829
 # modified-by: codex/gpt-5.6-sol | 2026-10-26 | 47cf23f | fix order-dependent conflict resolution and add provenance block
+# modified-by: codex/gpt-5.6-sol | 2026-10-26 | pending | compute proved and refuted literals to a joint fixpoint
 # reviewed-by: claude-code/claude-opus-5-5 | 2026-10-26 | REJECT
 # END PROVENANCE
 """A compact, deterministic defeasible evaluator."""
@@ -74,34 +75,61 @@ def evaluate(duty_map: DutyMap, facts: Iterable[str] = ()) -> Evaluation:
                 definite[rule.conclusion] = _chain(rule, definite)
                 changed = True
 
-    rank = _superiority_closure(duty_map.superiority)
-    reachable = set(definite)
-    changed = True
-    while changed:
-        changed = False
-        for rule in rules:
-            if not all(premise in reachable for premise in rule.premises):
-                continue
-            if rule.kind != "defeater" and rule.conclusion not in reachable:
-                reachable.add(rule.conclusion)
-                changed = True
-
-    activated = [rule for rule in rules if all(p in reachable for p in rule.premises)]
     supported = dict(definite)
+    refuted: set[str] = set()
+    literals = set(definite)
+    for rule in rules:
+        literals.update(rule.premises)
+        literals.add(rule.conclusion)
+        literals.add(opposite(rule.conclusion))
+
+    rank = _superiority_closure(duty_map.superiority)
     changed = True
     while changed:
-        changed = False
-        for rule in activated:
+        newly_supported: dict[str, tuple[str, ...]] = {}
+        for rule in rules:
             if rule.kind == "defeater" or rule.conclusion in supported:
                 continue
             if not all(premise in supported for premise in rule.premises):
                 continue
             if opposite(rule.conclusion) in definite:
                 continue
-            opponents = [other for other in activated if other.conclusion == opposite(rule.conclusion)]
+            opponents = [
+                other
+                for other in rules
+                if other.conclusion == opposite(rule.conclusion)
+                and not any(premise in refuted for premise in other.premises)
+            ]
             if all(_is_superior(rule.id, other.id, rank) for other in opponents):
-                supported[rule.conclusion] = _chain(rule, supported)
-                changed = True
+                newly_supported.setdefault(rule.conclusion, _chain(rule, supported))
+
+        newly_refuted: set[str] = set()
+        for literal in literals:
+            if literal in definite or literal in refuted:
+                continue
+            if opposite(literal) in definite:
+                newly_refuted.add(literal)
+                continue
+            supporters = [
+                rule
+                for rule in rules
+                if rule.kind != "defeater" and rule.conclusion == literal
+            ]
+            opponents = [rule for rule in rules if rule.conclusion == opposite(literal)]
+            if all(
+                any(premise in refuted for premise in supporter.premises)
+                or any(
+                    all(premise in supported for premise in opponent.premises)
+                    and not _is_superior(supporter.id, opponent.id, rank)
+                    for opponent in opponents
+                )
+                for supporter in supporters
+            ):
+                newly_refuted.add(literal)
+
+        changed = bool(newly_supported or newly_refuted)
+        supported.update(newly_supported)
+        refuted.update(newly_refuted)
 
     proofs: dict[str, Proof] = {}
     candidates = set(definite) | set(supported)
